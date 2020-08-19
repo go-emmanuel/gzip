@@ -1,5 +1,6 @@
 // Copyright 2013 Martini Authors
 // Copyright 2015 The Macaron Authors
+// Copyright 2020 the Emmanuel developers
 //
 // Licensed under the Apache License, Version 2.0 (the "License"): you may
 // not use this file except in compliance with the License. You may obtain
@@ -22,8 +23,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/go-emmanuel/emmanuel"
 	"github.com/klauspost/compress/gzip"
-	"gopkg.in/macaron.v1"
 )
 
 const (
@@ -62,10 +63,10 @@ func prepareOptions(options []Options) Options {
 // Gziper returns a Handler that adds gzip compression to all requests.
 // Make sure to include the Gzip middleware above other middleware
 // that alter the response body (like the render middleware).
-func Gziper(options ...Options) macaron.Handler {
+func Gziper(options ...Options) emmanuel.Handler {
 	opt := prepareOptions(options)
 
-	return func(ctx *macaron.Context) {
+	return func(ctx *emmanuel.Context) {
 		if !strings.Contains(ctx.Req.Header.Get(_HEADER_ACCEPT_ENCODING), "gzip") {
 			return
 		}
@@ -88,7 +89,7 @@ func Gziper(options ...Options) macaron.Handler {
 
 		// Check if render middleware has been registered,
 		// if yes, we need to modify ResponseWriter for it as well.
-		if _, ok := ctx.Render.(*macaron.DummyRender); !ok {
+		if _, ok := ctx.Render.(*emmanuel.DummyRender); !ok {
 			ctx.Render.SetResponseWriter(gzw)
 		}
 
@@ -101,7 +102,7 @@ func Gziper(options ...Options) macaron.Handler {
 
 type gzipResponseWriter struct {
 	w *gzip.Writer
-	macaron.ResponseWriter
+	emmanuel.ResponseWriter
 }
 
 func (grw gzipResponseWriter) Write(p []byte) (int, error) {
